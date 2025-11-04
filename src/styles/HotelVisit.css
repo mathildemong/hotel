@@ -1,0 +1,93 @@
+.hotel-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: black;
+  font-family: 'Inter', sans-serif;
+}
+
+.room-background {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.arrow {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 5px black);
+}
+
+.arrow:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 10px white);
+}
+
+.fade-overlay {
+  position: absolute;
+  inset: 0;
+  background: black;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 50;
+  transition: opacity 1s ease;
+}
+
+.fade-overlay.active {
+  opacity: 1;
+}
+
+.mini-map {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+.map-image {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.map-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.map-btn {
+  background: #e0e0e0;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.map-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+.map-btn.active {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.6);
+}
