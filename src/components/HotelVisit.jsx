@@ -1,5 +1,6 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import YouTube from "react-youtube";
 import "../styles/HotelVisit.css";
 
 const rooms = {
@@ -27,41 +28,55 @@ const rooms = {
 export default function HotelVisit() {
   const [currentRoom, setCurrentRoom] = useState("reception");
   const [transitioning, setTransitioning] = useState(false);
-  const audioRef = useRef(null);
+  const [soundEnabled, setSoundEnabled] = useState(false); // désactivé au départ
+  const [muted, setMuted] = useState(false); // commence non muet
+  const [showMap, setShowMap] = useState(false);
+  const playerRef = useRef(null);
   const room = rooms[currentRoom];
 
-  // 🔊 Lancer la musique d’ambiance globale (une seule fois)
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = 0.4;
-      audioRef.current.play().catch(() => {});
-    }
-  }, []);
-
+  // Changer de pièce
   const handleChangeRoom = (target) => {
     if (transitioning) return;
     setTransitioning(true);
-
-    // délai pendant le fondu noir
     setTimeout(() => {
       setCurrentRoom(target);
       setTransitioning(false);
     }, 1000);
   };
 
+  // Lecteur YouTube prêt
+  const onReady = (event) => {
+    playerRef.current = event.target;
+    playerRef.current.setVolume(50);
+    // Ne pas mute ici pour pouvoir activer le son directement
+  };
+
+  // Activer le son au clic utilisateur (unmute directement)
+  const handleEnableSound = () => {
+    if (playerRef.current) {
+      playerRef.current.unMute();
+      setMuted(false);
+    }
+    setSoundEnabled(true);
+  };
+
+  // Toggle mute/unmute après activation
+  const toggleMute = () => {
+    if (!playerRef.current) return;
+    if (muted) playerRef.current.unMute();
+    else playerRef.current.mute();
+    setMuted(!muted);
+  };
+
   return (
     <div className="hotel-container">
-      {/* Overlay noir pour transition */}
+      {/* Overlay transition */}
       <motion.div
         key={`fade-${currentRoom}`}
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 0 }}
-        exit={{ opacity: 1 }}
-        transition={{ duration: 1 }}
         className={`fade-overlay ${transitioning ? "active" : ""}`}
       />
 
-      {/* Image principale + flèches */}
+      {/* Pièce principale */}
       <AnimatePresence mode="wait">
         <motion.div
           key={currentRoom}
@@ -70,9 +85,7 @@ export default function HotelVisit() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
           className="room-background"
-          style={{
-            backgroundImage: `url(${room.image})`,
-          }}
+          style={{ backgroundImage: `url(${room.image})` }}
         >
           {room.hotspots.map((spot, i) => (
             <img
@@ -80,19 +93,19 @@ export default function HotelVisit() {
               src={`/images/arrow-${spot.direction}.png`}
               alt="arrow"
               className="arrow"
-              style={{
-                top: spot.top,
-                left: spot.left,
-              }}
+              style={{ top: spot.top, left: spot.left }}
               onClick={() => handleChangeRoom(spot.target)}
             />
           ))}
         </motion.div>
       </AnimatePresence>
 
-      {/* Mini carte de navigation */}
+      {/* Mini-carte centrée en bas */}
       <div className="mini-map">
-        <img src="/images/map.png" alt="Plan" className="map-image" />
+        <div className="map-header" onClick={() => setShowMap(true)}>
+          <img src="/images/map.png" alt="Plan" className="map-image" />
+          <div className="map-label">🗺️ Agrandir</div>
+        </div>
         <div className="map-buttons">
           {Object.keys(rooms).map((roomKey) => (
             <button
@@ -107,13 +120,69 @@ export default function HotelVisit() {
           ))}
         </div>
       </div>
-<audio
-  ref={audioRef}
-  src="https://www.youtube.com/watch?v=D4cJfCmNiwQ&list=RDD4cJfCmNiwQ&start_radio=1"
-  loop
-  autoPlay
-/>
 
+      {/* Popin carte agrandie */}
+      <AnimatePresence>
+        {showMap && (
+          <motion.div
+            className="map-popin-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="map-popin"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            >
+              <button
+                className="close-btn"
+                onClick={() => setShowMap(false)}
+              >
+                ✖
+              </button>
+              <img
+                src="/images/map.png"
+                alt="Plan détaillé"
+                className="map-full"
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Bouton de son */}
+      <div className="sound-controls">
+        {!soundEnabled ? (
+          <button className="sound-btn" onClick={handleEnableSound}>
+            🎵 Activer le son
+          </button>
+        ) : (
+          <button className="sound-btn" onClick={toggleMute}>
+            {muted ? "🔇" : "🔊"}
+          </button>
+        )}
+      </div>
+
+      {/* Lecteur YouTube en fond */}
+      {soundEnabled && (
+        <YouTube
+          videoId="-fN-Xjpd-qE"
+          opts={{
+            playerVars: {
+              autoplay: 1,
+              loop: 1,
+              playlist: "-fN-Xjpd-qE",
+              controls: 0,
+              modestbranding: 1,
+            },
+          }}
+          onReady={onReady}
+          style={{ display: "none" }}
+        />
+      )}
     </div>
   );
 }
