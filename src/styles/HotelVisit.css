@@ -44,11 +44,13 @@
 /* Flèches de navigation */
 .arrow {
   position: absolute;
-  width: 60px;
-  height: 60px;
   cursor: pointer;
   transition: transform 0.3s ease, filter 0.3s ease;
   filter: drop-shadow(0 0 5px black);
+  -webkit-transition: transform 0.3s ease, filter 0.3s ease;
+  -moz-transition: transform 0.3s ease, filter 0.3s ease;
+  -ms-transition: transform 0.3s ease, filter 0.3s ease;
+  -o-transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .arrow:hover {
